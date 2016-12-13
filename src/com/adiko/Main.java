@@ -23,7 +23,9 @@ public class Main extends Application {
     String input;
     int md5index = 0;
 
-    String password = "";
+
+    Character[] password = new Character[]{'_', '_', '_', '_', '_', '_', '_', '_'};
+    boolean passwordComplete = false;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -46,27 +48,59 @@ public class Main extends Application {
 
     private void processInput() {
         parseInput();
+
         generatePassword();
-        tfOutput.setText(password);
+printPassword();
+    }
+
+    private void printPassword() {
+        StringBuilder sb = new StringBuilder();
+        for (char c : password) {
+            sb.append(c);
+        }
+        tfOutput.setText(sb.toString());
     }
 
     private void generatePassword() {
-        while(password.length() < 8) {
+        while (!isPasswordFinished()) {
             StringBuilder sb = new StringBuilder(input);
             sb.append(md5index);
             String md5string = md5(sb.toString());
-           // System.out.println(md5index + ": " + md5string);
             processMd5ToPassword(md5string);
             md5index++;
         }
     }
 
+    private boolean isPasswordFinished() {
+        return passwordComplete;
+    }
+
     private void processMd5ToPassword(String md5string) {
-        if(md5string.startsWith("00000")){
-            StringBuilder sb = new StringBuilder(password);
-            sb.append(md5string.charAt(5));
-            password = sb.toString();
+        if (md5string.startsWith("00000")) {
+            System.out.println(md5string);
+            insertInPassword(Character.getNumericValue(md5string.charAt(5)), md5string.charAt(6));
         }
+    }
+
+    private void insertInPassword(int index, char character) {
+        System.out.println("Index: " + index + ", Character: " + character);
+        if (index < 8) {
+            if (password[index] == '_') {
+                System.out.println("Inserting \'" + character + "\' on index " + index);
+                password[index] = character;
+                updateIsPasswordComplete();
+            }
+        }
+    }
+
+    private void updateIsPasswordComplete() {
+        for (char c : password) {
+            if('_' == c){
+                passwordComplete = false;
+                return;
+            }
+        }
+        passwordComplete = true;
     }
 
     private void parseInput() {
